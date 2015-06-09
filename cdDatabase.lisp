@@ -5,7 +5,7 @@
 
 (defun add-record (cd) (push cd *db*))
 
-(defun dump-db () (dolist (cd *db*) (format t "~{~a:10t~a~%~}~%" cd )))
+(defun dump-db () (dolist (cd *db*) (format t "~{~a:~10t~a~%~}~%" cd )))
 
 (defun prompt-read (prompt)
   (format *query-io* "~a: " prompt)
@@ -22,5 +22,20 @@
 (defun add-cds ()
   (loop (add-record (prompt-for-cd))
       (if (not (y-or-n-p "Another? [y/n]: ")) (return))))
+
+(defun save-db (filename)
+  (with-open-file (out filename
+		       :direction :output
+		       :if-exists :supersede)
+    (with-standard-io-syntax
+      (print *db* out))))
+
+
+(defun load-db (filename)
+  (with-open-file (in filename)
+    (with-standard-io-syntax
+      (setf *db* (read in)))))
+
+
 
 (defparameter *fn* (let ((count 0)) #'(lambda () (setf count (1+ count)))))
