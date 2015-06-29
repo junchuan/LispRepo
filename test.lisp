@@ -14,7 +14,7 @@
      ,@body)))
 
 (defmacro check (&body forms)
-  `(progn
+  `(combine-results
      ,@(loop for f in forms collect `(report-result ,f ',f))))
 
 (defun report-result (result form)
@@ -26,3 +26,12 @@
    (= (+ 1 2 3) 6)
    (= (+ -1 -3) -4))) 
 
+(defmacro combine-results (&body forms)
+  (with-gensyms (result)
+    `(let ((,result t))
+       ,@(loop for f in forms collect `(unless ,f (setf ,result NIL)))
+       ,result)))
+
+(defmacro with-gensyms ((&rest names) &body body)
+  `(let ,(loop for n in names collect `(,n (gensym)))
+     ,@body))
